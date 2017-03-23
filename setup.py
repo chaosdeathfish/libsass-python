@@ -85,8 +85,9 @@ if sys.platform == 'win32':
     link_flags = []
 else:
     flags = [
-        '-fPIC', '-std=c++0x', '-Wall', '-Wno-parentheses', '-Werror=switch',
+        '-Wall', '-Wno-parentheses', '-Werror=switch',
     ]
+    
     platform.mac_ver()
     if platform.system() in ['Darwin', 'FreeBSD']:
         os.environ.setdefault('CC', 'clang')
@@ -134,7 +135,11 @@ else:
                 with open(cencode_path, 'w') as f:
                     f.write(cencode_body)
 
-    flags = ['-c', '-O3'] + flags
+    # Cygwin's standard includes don't work properly with gcc
+    if platform.system().startswith('CYGWIN_NT-'):
+        flags = ['-std=gnu++0x', '-c', '-O3'] + flags
+    else:
+        flags = ['-fPIC', '-std=c++0x', '-c', '-O3'] + flags
 
     if platform.system() == 'FreeBSD':
         link_flags = ['-fPIC', '-lc++']
